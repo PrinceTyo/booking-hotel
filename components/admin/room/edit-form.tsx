@@ -6,12 +6,19 @@ import { IoCloudUploadOutline, IoTrashOutline } from "react-icons/io5";
 import Image from "next/image";
 import { BarLoader } from "react-spinners";
 import { Amenities } from "@/app/generated/prisma";
-import { saveRoom } from "@/lib/actions";
+import { updateRoom } from "@/lib/actions";
 import clsx from "clsx";
+import { RoomProps } from "@/types/room";
 
-const CreateForm = ({ amenities }: { amenities: Amenities[] }) => {
+const EditForm = ({
+  amenities,
+  room,
+}: {
+  amenities: Amenities[];
+  room: RoomProps;
+}) => {
   const inputFileRef = useRef<HTMLInputElement>(null);
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState(room.image);
   const [message, setMessage] = useState("");
   const [pending, startTransition] = useTransition();
 
@@ -53,9 +60,12 @@ const CreateForm = ({ amenities }: { amenities: Amenities[] }) => {
   };
 
   const [state, formAction, isPending] = useActionState(
-    saveRoom.bind(null, image),
+    updateRoom.bind(null, image, room.id),
     null,
   );
+
+  const checkedAmenities = room.RoomAmenities.map((item) => item.amenitiesId);
+
   return (
     <form action={formAction}>
       <div className="grid md:grid-cols-12 gap-5">
@@ -64,6 +74,7 @@ const CreateForm = ({ amenities }: { amenities: Amenities[] }) => {
             <input
               type="text"
               name="name"
+              defaultValue={room.name}
               className="py-2 px-4 rounded-sm border border-gray-400 w-full"
               placeholder="Room Name..."
             />
@@ -77,6 +88,7 @@ const CreateForm = ({ amenities }: { amenities: Amenities[] }) => {
             <textarea
               name="description"
               rows={8}
+              defaultValue={room.description}
               className="py-2 px-4 rounded-sm border border-gray-400 w-full"
               placeholder="Description"
             ></textarea>
@@ -93,6 +105,7 @@ const CreateForm = ({ amenities }: { amenities: Amenities[] }) => {
                   type="checkbox"
                   name="amenities"
                   defaultValue={item.id}
+                  defaultChecked={checkedAmenities.includes(item.id)}
                   className="w-4 h-4 text-blue-600 bg-gray-100 border border-gray-300 rounded"
                 />
                 <label className="ms-2 text-sm font-medium text-gray-900 capitalize">
@@ -159,6 +172,7 @@ const CreateForm = ({ amenities }: { amenities: Amenities[] }) => {
             <input
               type="text"
               name="capacity"
+              defaultValue={room.capacity}
               className="py-2 px-4 rounded-sm border border-gray-400 w-full"
               placeholder="Capacity..."
             />
@@ -172,6 +186,7 @@ const CreateForm = ({ amenities }: { amenities: Amenities[] }) => {
             <input
               type="text"
               name="price"
+              defaultValue={room.price}
               className="py-2 px-4 rounded-sm border border-gray-400 w-full"
               placeholder="Price..."
             />
@@ -198,7 +213,7 @@ const CreateForm = ({ amenities }: { amenities: Amenities[] }) => {
             )}
             disabled={isPending}
           >
-            {isPending ? "Saving..." : "Save"}
+            {isPending ? "Updating..." : "Update"}
           </button>
         </div>
       </div>
@@ -206,4 +221,4 @@ const CreateForm = ({ amenities }: { amenities: Amenities[] }) => {
   );
 };
 
-export default CreateForm;
+export default EditForm;
